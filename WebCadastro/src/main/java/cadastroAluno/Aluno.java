@@ -10,6 +10,29 @@ public class Aluno{
 	private String email;
 	private String Telefone;
 	private String Endereco;
+	private String Bairro;
+	private String Cidade;
+	private String Estado;
+	
+	
+	public String getBairro() {
+		return Bairro;
+	}
+	public void setBairro(String bairro) {
+		Bairro = bairro;
+	}
+	public String getCidade() {
+		return Cidade;
+	}
+	public void setCidade(String cidade) {
+		Cidade = cidade;
+	}
+	public String getEstado() {
+		return Estado;
+	}
+	public void setEstado(String estado) {
+		Estado = estado;
+	}
 	private String CEP;
 	private String RG;
 	private String CPF;
