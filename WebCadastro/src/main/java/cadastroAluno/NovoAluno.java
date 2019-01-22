@@ -1,8 +1,14 @@
 package cadastroAluno;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.List;
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
 
 import java.io.OutputStream;
@@ -12,6 +18,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import br.com.caelum.stella.ValidationMessage;
 import br.com.caelum.stella.boleto.Beneficiario;
@@ -29,14 +38,41 @@ import br.com.caelum.stella.validation.TituloEleitoralValidator;
 @WebServlet(urlPatterns = "/novoAluno")
 public class NovoAluno extends HttpServlet {
 
+	// usando o json
+	// ***************************************************************************************
+	public static JSONObject readJsonFromUrl(String link) throws IOException, JSONException {
+		URL url = new URL(link);
+		URLConnection urlConn = url.openConnection();
+		urlConn.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)");
+		InputStream is = urlConn.getInputStream();
+
+		try {
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+			String jsonText = readAll(rd);
+			JSONObject json = new JSONObject(jsonText);
+			return json;
+		} finally {
+			is.close();
+		}
+	}
+
+	private static String readAll(BufferedReader rd) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		int cep;
+		while ((cep = rd.read()) != -1) {
+			sb.append((char) cep);
+		}
+		return sb.toString();
+	}
+
+	// ***************************************************************************************
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		PrintWriter out = resp.getWriter();
 
-//******************************************************************************	
 		// passando os dados do formulario para a servlet
-		
+//******************************************************************************			
 		String nome = req.getParameter("nome");
 		String sobrenome = req.getParameter("sobrenome");
 		String sexo = req.getParameter("Sexo");
@@ -51,18 +87,18 @@ public class NovoAluno extends HttpServlet {
 		String CPF = req.getParameter("CPF");
 		String TituloDeEleitor = req.getParameter("TituloDeEleitor");
 // **************************************************************************
-		
-		
-		// comecando o html do servlet
+
+		CPF = CPF.replace(".", "").replace(" ", "").replace("-", "");
+
+		// começando o html do servlet
 // *************************************************************
 		out.println("<html><head>");
 // *************************************************************
-		
-		
+
 		// Ajeitando o cabeçalho atraves do css
 // *************************************************************
 		out.println("<style type=text/css>");
-		out.print("#cabecalho"); // arrumando o cabeça~ho da pagina 
+		out.print("#cabecalho"); // arrumando o cabeça~ho da pagina
 		out.print("{");
 		out.print("background-color: #21610B;");
 		out.print("font-family: Arial;");
@@ -87,11 +123,11 @@ public class NovoAluno extends HttpServlet {
 		out.print("position: absolute;");
 		out.print("margin-left: 9%;");
 		out.print("}");
-		out.print("</style>");		
+		out.print("</style>");
 		out.print("</head>");
 //******************************************************************************		
-	
-		out.print("<body>");		
+
+		out.print("<body>");
 		out.print("<div id = cabecalho>"); // criando a div do cabeçalho
 		out.print("<div id= InstFed >"); // criando a div do nome Isntitudo federal no cabeçalho
 		out.print("<h1 style=\"font-size: 70%\">Instituto Federal de Educação, Ciência e Tecnologia do Ceará</h1>");
@@ -106,33 +142,6 @@ public class NovoAluno extends HttpServlet {
 
 		Aluno e1 = new Aluno();
 
-		
-		// adicionando o os campos do formulario no objeto aluno
-//***********************************************************************************
-		e1.setNome(nome);
-		e1.setSobrenome(sobrenome);
-		e1.setSexo(sexo);
-		e1.setTelefone(telefone);
-		e1.setEmail(email);
-		e1.setEndereco(endereco);
-		e1.setBairro(bairro);
-		e1.setCidade(cidade);
-		e1.setEstado(estado);
-		e1.setCEP(CEP);
-		e1.setRG(RG);
-		e1.setCPF(CPF);
-		e1.setTituloDeEleitor(TituloDeEleitor);
-//***********************************************************************************
-	
-		
-		//retirando pontos espaços e hifens do cpf
-//***********************************************************************************
-		CPF = CPF.replace(" ", ""); // tira espaço em branco
-		CPF = CPF.replace(".", ""); // tira ponto
-		CPF = CPF.replace("-", ""); // tira hífen
-//***********************************************************************************
-		
-		
 		// Verificando se algum campo ficou em branco
 //***********************************************************************************
 		if (nome.isEmpty()) {
@@ -140,7 +149,8 @@ public class NovoAluno extends HttpServlet {
 			out.println("<center>");
 			out.println(
 					"<h1>O Campo de nome foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+			out.println(
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 			out.println("</center>");
 			out.println("</body></html>");
 			return;
@@ -150,7 +160,8 @@ public class NovoAluno extends HttpServlet {
 			out.println("<center>");
 			out.println(
 					"<h1>O Campo sobrenome de eleitor foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+			out.println(
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 			out.println("</center>");
 			out.println("</body></html>");
 
@@ -160,7 +171,8 @@ public class NovoAluno extends HttpServlet {
 			out.println("<center>");
 			out.println(
 					"<h1>O Campo Sexo foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+			out.println(
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 			out.println("</center>");
 			out.println("</body></html>");
 
@@ -171,7 +183,8 @@ public class NovoAluno extends HttpServlet {
 			out.println("<center>");
 			out.println(
 					"<h1>O Campo endereço foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+			out.println(
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 			out.println("</center>");
 
 			out.println("</body></html>");
@@ -182,40 +195,45 @@ public class NovoAluno extends HttpServlet {
 			out.println("<center>");
 			out.println(
 					"<h1>O Campo Bairro foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
-			out.println("</center>");
-
-			out.println("</body></html>");
-
-			return;
-		}
-		if (cidade.isEmpty()) {
-
-			out.println("<center>");
 			out.println(
-					"<h1>O Campo cidade foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 			out.println("</center>");
 
-			out.println("</body></html>");
-			return;
-		}
-		if (estado.isEmpty()) {
-
-			out.println("<center>");
-			out.println(
-					"<h1>O Campo estado foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
-			out.println("</center>");
 			out.println("</body></html>");
 
 			return;
 		}
+
 		if (CEP.isEmpty()) {
 
 			out.println("<center>");
 			out.println("<h1>O Campo CEP foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+			out.println(
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
+			out.println("</center>");
+			out.println("</body></html>");
+
+			return;
+		}
+		JSONObject json = null;
+		String cj = CEP.replace(".", "").replace("-", "");
+
+		try {
+			json = readJsonFromUrl("https://viacep.com.br/ws/" + cj + "/json/");
+		} catch (JSONException e) {
+			out.println("<center>");
+			out.println("<h1>CEP invalido </h1>");
+			out.println(
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
+			out.println("</center>");
+			out.println("</body></html>");
+
+			return;
+		} catch (IOException e) {
+			out.println("<center>");
+			out.println("<h1>CEP invalido</h1>");
+			out.println(
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 			out.println("</center>");
 			out.println("</body></html>");
 
@@ -224,7 +242,8 @@ public class NovoAluno extends HttpServlet {
 		if (RG.isEmpty()) {
 			out.println("<center>");
 			out.println("<h1>O Campo RG foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+			out.println(
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 			out.println("</center>");
 			out.println("</body></html>");
 
@@ -234,7 +253,8 @@ public class NovoAluno extends HttpServlet {
 
 			out.println("<center>");
 			out.println("<h1>O Campo CPF foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+			out.println(
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 			out.println("</center>");
 			out.println("</body></html>");
 
@@ -244,15 +264,15 @@ public class NovoAluno extends HttpServlet {
 			out.println("<center>");
 			out.println(
 					"<h1>O Campo Titulo de eleitor foi deixado em branco, por favor preencha todos os campus obrigadorios </h1>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+			out.println(
+					"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 			out.println("</center>");
 			out.println("</body></html>");
 
 			return;
 		}
 //******************************************************************************
-		
-		
+
 		// verificando se o CPF e o Titulo sâo validos
 //******************************************************************************
 		CPFValidator cpfvalidator = new CPFValidator();
@@ -264,7 +284,8 @@ public class NovoAluno extends HttpServlet {
 			if (!cpfValidationMessages.isEmpty()) {
 				out.println("<center>");
 				out.println("<h1>O Campo CPF esta invalido, por favor preencha novamente </h1>");
-				out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+				out.println(
+						"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 				out.println("</center>");
 				out.println("</body></html>");
 				return;
@@ -281,7 +302,8 @@ public class NovoAluno extends HttpServlet {
 
 				out.println("<center>");
 				out.print("Titulo de eleitor invalido");
-				out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+				out.println(
+						"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 				out.println("</center>");
 
 				out.println("</body></html>");
@@ -290,37 +312,56 @@ public class NovoAluno extends HttpServlet {
 
 		}
 //******************************************************************************
-		
+
 		Banco b = new Banco();
 		List<Aluno> lista = b.getAlunos();
-		//verificando se ja o CPF ja foi cadastrado anteriomente
+		// verificando se ja o CPF ja foi cadastrado anteriomente
 //******************************************************************************
 		for (Aluno aluno : lista) {
 			if (aluno.getCPF().contains(CPF)) {
 				out.println("</center>");
 				out.println("<h1>Esse CPF ja foi cadastrado</h1>");
 				out.print("<button><a href=http://localhost:8080/website/lista?>Lista de cadastredos</a></button>");
-				out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
+				out.println(
+						"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
 				out.println("</center>");
 				out.println("</body>");
 				out.println("</html>");
 				return;
 			}
 		}
-//******************************************************************************
 
-			b.adiciona(e1); // adicionando os dados do aluno no banco de dados
-			out.println("<center>");
-			//mensagem mostrada caso o aluno tenha sido cadastrado com sucesso 
+		// adicionando o os campos do formulario no objeto aluno
+//***********************************************************************************
+		e1.setNome(nome);
+		e1.setSobrenome(sobrenome);
+		e1.setSexo(sexo);
+		e1.setTelefone(telefone);
+		e1.setEmail(email);
+		e1.setEndereco(endereco);
+		e1.setBairro(bairro);
+		e1.setCidade(json.get("localidade").toString());
+		e1.setEstado(json.get("uf").toString());
+		e1.setCEP(CEP);
+		e1.setRG(RG);
+		e1.setCPF(CPF);
+		e1.setTituloDeEleitor(TituloDeEleitor);
+//***********************************************************************************
+
+		b.adiciona(e1); // adicionando os dados do aluno no banco de dados
+		out.println("<center>");
+
+		// mensagem mostrada caso o aluno tenha sido cadastrado com sucesso
 //******************************************************************************
-			out.println("<h1>Oi " + nome + " " + sobrenome + " voçê foi cadastrado com sucesso!<br /></h1>");
-			out.print("<button><a href=http://localhost:8080/website/lista?>Lista de cadastredos</a></button>");
-			out.println("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de inscrição</a></button>");
-			out.println("</center>");
-			out.println("</body>");
-			out.println("</html>");
-			return;
-		}
+		out.println("<h1>Oi " + nome + " " + sobrenome + " voçê foi cadastrado com sucesso!<br /></h1>");
+		out.print("<button><a href=http://localhost:8080/website/lista?>Lista de cadastredos</a></button>");
+		out.println(
+				"<button><a href=http://localhost:8080/website/Formulario.html>Formulario de inscrição</a></button>");
+		out.println("</center>");
+		out.println("</body>");
+		out.println("</html>");
+		return;
+	}
 //******************************************************************************
 
 }

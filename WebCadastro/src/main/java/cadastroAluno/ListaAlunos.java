@@ -12,7 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = "/lista")
 public class ListaAlunos extends HttpServlet {
-int num = 0;
+	int num = 0;
+
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
@@ -20,9 +21,11 @@ int num = 0;
 		List<Aluno> lista = banco.getAlunos();
 		PrintWriter out = response.getWriter();
 		out.println("<html><head>");
+		// Ajeitando o cabeçalho atraves do css
+		// *************************************************************
 		out.println("<style type=text/css>");
-        out.print("#cabecalho");
-        out.print("{");
+		out.print("#cabecalho");
+		out.print("{");
 		out.print("background-color: #21610B;");
 		out.print("font-family: Arial;");
 		out.print("padding: 0.5%;");
@@ -47,6 +50,8 @@ int num = 0;
 		out.print("margin-left: 9%;");
 		out.print("}");
 		out.print("</style>");
+		// *************************************************************
+
 		out.print("</head>");
 		out.print("<body>");
 		out.print("<div id = cabecalho>");
@@ -63,7 +68,8 @@ int num = 0;
 		out.print("<center>");
 		out.println("<table border=1>");
 		out.println("<tr>");
-		out.println("<td> Numero De Inscrição </td>");
+		// *************************************************************
+		// colocando os nomes das tabelas
 		out.println("<td> nome </td>");
 		out.println("<td> sobrenome </td>");
 		out.println("<td> Sexo </td>");
@@ -79,9 +85,12 @@ int num = 0;
 		out.println("<td> Titullo de eleitor </td>");
 		out.println("</tr>");
 		out.println("<tr>");
+		// *************************************************************
+
+		// preenchendo as tabelas
+		// *************************************************************
 		for (Aluno aluno : lista) {
-			num++;
-			out.println("<td><center>"+num+"</center></td>");
+
 			out.println("<td>" + aluno.getNome() + "</td>");
 			out.println("<td>" + aluno.getSobrenome() + "</td>");
 			out.println("<td>" + aluno.getSexo() + "</td>");
@@ -97,7 +106,7 @@ int num = 0;
 			out.println("<td>" + aluno.getTituloDeEleitor() + "</td>");
 			out.println("</tr>");
 		}
-
+		// *************************************************************
 		out.println("</table>");
 		out.print("<button><a href=http://localhost:8080/website/Formulario1.html>Formulario de incrição</a></button>");
 		out.print("</center>");
